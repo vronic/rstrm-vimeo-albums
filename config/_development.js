@@ -4,11 +4,15 @@
 export default (config) => ({
   compiler_public_path: `http://${config.server_host}:${config.server_port}/`,
   proxy: {
-    enabled: false,
+    enabled: true,
     options: {
       // koa-proxy options
-      host: 'http://localhost:8000',
-      match: /^\/api\/.*/
+      host: 'https://api.vimeo.com',
+      match: /^\/api/,
+      map: function (path) {
+        console.log('proxy', path)
+        return '/oauth/access_token'
+      }
     }
   }
 })

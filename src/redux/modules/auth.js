@@ -1,3 +1,4 @@
+import axios from 'axios'
 
 const Vimeo = require('vimeo').Vimeo
 
@@ -21,9 +22,9 @@ export const url = lib.buildAuthorizationEndpoint(redirect_uri, scopes, state_ra
 // Action Handlers
 // ------------------------------------
 const ACTION_HANDLERS = {
-  ['@@router/LOCATION_CHANGE']: (state, { payload: { query } }) => (
-    { ...state, random: +query.state, code: query.code }
-  )
+  ['@@router/LOCATION_CHANGE']: (state, { payload: { query } }) => {
+    return { ...state, random: +query.state, code: query.code }
+  }
 }
 
 // ------------------------------------
@@ -42,22 +43,35 @@ export default function counterReducer (state = initialState, action) {
 }
 
 export const get_token = () => async (dispatch, getState) => {
-  // redirect_uri must be provided, and must match your configured uri
-    // lib.accessToken(code, redirect_uri, function (err, token) {
-    //     if (err) {
-    //             return response.end("error\n" + err);
-    //     }
+  const { auth: { code } } = getState()
+  // console.log('get_token', code, redirect_uri)
 
-    //     if (token.access_token) {
-    //             // At this state the code has been successfully exchanged for an access token
-    //             lib.access_token = token.access_token;
+  try {
+    // Authorization = 'Basic ' + new Buffer(this._client_id + ':' + this._client_secret).toString('base64')
+    // 'Authorization: basic ' + base64(client_id + ':' + client_secret)
+    // axios.defaults.headers.common['Authorization'] = 'Basic ' + btoa(CLIENT_ID + ':' + CLIENT_SECRET)
+    // axios.defaults.headers.common['Accept'] = '*/*' // 'application/vnd.vimeo.*+json;version=3.2'
+    // axios.defaults.headers.common['User-Agent'] = 'Vimeo.js/1.2.0'
+    // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 
-    //             // Other useful information is included alongside the access token
-    //             // We include the final scopes granted to the token. This is important because the user (or api) might revoke scopes during the authentication process
-    //             var scopes = token.scope;
+    // const auth_base64 = btoa(CLIENT_ID + ':' + CLIENT_SECRET)
+    // console.log('get_token auth_base64', auth_base64)
 
-    //             // We also include the full user response of the newly authenticated user.
-    //             var user = access_token.user;
-    //     }
-    // });
+    let { data } = await axios.post('http://localhost:3000/api', {
+      code, redirect_uri, grant_type: 'authorization_code'
+    }, {
+      auth: {
+        username: CLIENT_ID,
+        password: CLIENT_SECRET
+      },
+      headers: {
+        // Authorization: 'Basic ' + auth_base64 // ,
+        'Content-Type': 'application/x-www-form-urlencoded'
+        // Accept: 'application/vnd.vimeo.*+json;version=3.2'
+      }
+    })
+    console.log('get_token', data)
+  } catch (error) {
+    console.log('get_token error', error)
+  }
 }

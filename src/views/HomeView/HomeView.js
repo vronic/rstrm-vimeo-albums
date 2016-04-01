@@ -10,7 +10,8 @@ export class HomeView extends React.Component {
 
   static propTypes = {
     children: PropTypes.element,
-    auth: PropTypes.object
+    auth: PropTypes.object,
+    get_token: PropTypes.func
   }
 
   constructor (props) {
@@ -19,11 +20,19 @@ export class HomeView extends React.Component {
     }
   }
 
+  componentWillMount () {
+    const { auth, get_token } = this.props
+    // TODO: надо проверить совпадение рандомного стейта отправленног одля получения кода
+    if (auth.code) {
+      get_token()
+    }
+  }
+
   /* eslint-disable react/jsx-no-bind */
   /* eslint-disable no-return-assign */
   render () {
     const auth = this.props.auth
-    // TODO: надо проверить совпадение рандомного стейта отправленног одля получения кода
+
     const oauth_button = !auth.token
       ? (<a href={url} className='btn btn-default' role='button'>
         Войти через Vimeo
